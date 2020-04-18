@@ -1,6 +1,7 @@
 //! The core library
-#![deny(missing_docs)]
-//#![allow(unknown_lints, proc_macro_derive_resolution_fallback)]
+#![warn(missing_docs)]
+
+pub mod protocol;
 
 #[cfg(feature = "backend")]
 #[macro_use]
@@ -13,4 +14,4 @@ extern crate diesel;
 // }
 
 #[allow(missing_docs)]
-pub const API_URL_V1_NEW: &str = "v1/new";
+pub const API_URL_V1_NEW_PAGE: &str = "v1/new_page";
