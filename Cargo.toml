@@ -1,20 +1,19 @@
 [package]
-name = "proger"
+name = "proger-core"
 version = "0.1.0"
 authors = ["Ofer Affias <ofer.affias@gmail.com>"]
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/vim-zz/proger"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-# [[bin]]
-# name = "app"
-# path = "src/frontend/main.rs"
-# required-features = ["frontend"]
-
-[[bin]]
-name = "backend"
-path = "src/backend/main.rs"
-
 [dependencies]
+diesel = { version = "1.4", optional = true }
+
+[features]
+backend = ["diesel"]
+
+[workspace]
+members = [
+    "backend",
+    "frontend",
+]

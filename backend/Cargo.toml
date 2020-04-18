@@ -1,0 +1,17 @@
+[package]
+name = "proger-backend"
+version = "0.1.0"
+authors = ["Ofer Affias <ofer.affias@gmail.com>"]
+edition = "2018"
+license = "MIT"
+repository = "https://github.com/vim-zz/proger"
+
+[[bin]]
+name = "backend"
+path = "src/main.rs"
+
+[dev-dependencies]
+
+[dependencies]
+actix-web = { version = "2.0", features = ["openssl"] }
+proger-core = { path = "..", features = ["backend"] }

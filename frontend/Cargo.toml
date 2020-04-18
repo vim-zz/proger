@@ -1,0 +1,16 @@
+[package]
+name = "proger-frontend"
+version = "0.1.0"
+authors = ["Ofer Affias <ofer.affias@gmail.com>"]
+edition = "2018"
+license = "MIT"
+repository = "https://github.com/vim-zz/proger"
+
+[[bin]]
+name = "frontend"
+path = "src/main.rs"
+
+[dev-dependencies]
+
+[dependencies]
+proger-core = { path = ".." }
