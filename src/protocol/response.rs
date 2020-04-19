@@ -3,4 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 /// The logout response
-pub struct PageID(pub String);
+pub struct PageAccess {
+    pub admin_secret: String,
+    pub private_link: String,
+}

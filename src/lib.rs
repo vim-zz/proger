@@ -14,4 +14,6 @@ extern crate diesel;
 // }
 
 #[allow(missing_docs)]
-pub const API_URL_V1_NEW_PAGE: &str = "v1/new_page";
+pub const API_URL_V1_NEW_STEP_PAGE: &str = "v1/step/new";
+pub const API_URL_V1_SET_STEP: &str = "v1/step/set/{id}";
+pub const API_URL_V1_VIEW_PAGE: &str = "v1/{id}";
