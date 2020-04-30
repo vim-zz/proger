@@ -12,4 +12,5 @@ pub struct NewStepsPage {
 /// Set  steps as done
 pub struct SetStepsPage {
     completed: u32,
+    admin_secret: String,
 }

@@ -11,6 +11,8 @@ name = "backend"
 path = "src/main.rs"
 
 [dev-dependencies]
+reqwest = { version = "0.10.0", features = ["blocking", "json"] }
+mockall = "0.7.0"
 
 [dependencies]
 proger-core = { path = "..", features = ["backend"] }
@@ -21,3 +23,5 @@ anyhow = "1.0"
 env_logger = "0.7.1"
 log = "0.4.8"
 url = "2.1"
+rusoto_core = "0.43.0"
+rusoto_dynamodb = { version = "0.43.0", features = ["serialize_structs", "deserialize_structs"] }
