@@ -4,13 +4,13 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 /// The new page request
 pub struct NewStepsPage {
-    steps: u32,
-    start: u32,
+    pub steps: u32,
+    pub start: u32,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 /// Set  steps as done
 pub struct SetStepsPage {
-    completed: u32,
-    admin_secret: String,
+    pub completed: u32,
+    pub admin_secret: String,
 }

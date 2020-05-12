@@ -4,8 +4,10 @@ mod storage;
 
 pub use crate::server::{
     Server, 
-    Config,
-    StorageDriver,
 };
 
-pub use crate::storage::DynamoDbDriver;
+pub use crate::storage::{
+    dynamo_db_driver::DynamoDbDriver,
+    storage_actor::StorageExecutor,
+    storage_driver::{StorageDriver, StorageCmd},
+};

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 /// The new page response
 pub struct PageAccess {
     pub admin_secret: String,
-    pub private_link: String,
+    pub link: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
