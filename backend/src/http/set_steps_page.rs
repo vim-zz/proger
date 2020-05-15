@@ -1,16 +1,25 @@
 use log::debug;
-
 use actix_web::{
-    web::{
-        Json,
-        Path
-    },
+    web::{Json, Data},
     HttpResponse,
     Error,
 };
-use proger_core::protocol::{request, response};
+use proger_core::protocol::{
+    request::SetStepsPage,
+};
+use crate::StorageExecutor;
 
-pub async fn set_steps_page(id: Path<String>, payload: Json<request::SetStepsPage>) -> Result<HttpResponse, Error> {
-    debug!("set steps page {} request: {:?}", id, payload);
-    Ok(HttpResponse::Ok().finish())
+use crate::storage::storage_driver::{StorageDriver, StorageCmd};
+use actix::Addr;
+
+pub async fn set_steps_page<T: StorageDriver>(
+    payload: Json<SetStepsPage>,
+    storage: Data<Addr<StorageExecutor<T>>>
+) -> Result<HttpResponse, Error> {
+    debug!("new steps page request: {:?}", payload);
+    let _result = storage
+        .into_inner()
+        .send(StorageCmd::UpdateStepsPage(payload.into_inner()))
+        .await?;
+    Ok(HttpResponse::Ok().await?)
 }

@@ -4,6 +4,7 @@ use std::env;
 use proger_backend::{Server, DynamoDbDriver};
 use rusoto_core::Region;
 use rusoto_dynamodb::DynamoDbClient;
+use std::str::FromStr;
 
 
 fn main() -> Result<()> {

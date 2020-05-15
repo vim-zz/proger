@@ -44,7 +44,7 @@ impl Server {
                 .wrap(middleware::Logger::default())
                 .data(storage_executor.clone())
                 .service(resource(API_URL_V1_NEW_STEP_PAGE).route(post().to(new_steps_page::<T>)))
-                .service(resource(API_URL_V1_SET_STEP).route(put().to(set_steps_page)))
+                .service(resource(API_URL_V1_SET_STEP).route(put().to(set_steps_page::<T>)))
                 .service(resource(API_URL_V1_VIEW_PAGE).route(get().to(view_page)))
                 .service(Files::new("/", "./static/").index_file("index.html"))
         });

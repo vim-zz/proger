@@ -25,3 +25,5 @@ log = "0.4.8"
 url = "2.1"
 rusoto_core = "0.43.0"
 rusoto_dynamodb = { version = "0.43.0", features = ["serialize_structs", "deserialize_structs"] }
+tokio = "0.2"
+serde_dynamodb = "0.5.0"

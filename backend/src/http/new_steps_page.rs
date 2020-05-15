@@ -18,9 +18,9 @@ pub async fn new_steps_page<T: StorageDriver>(
     storage: Data<Addr<StorageExecutor<T>>>
 ) -> Result<HttpResponse, Error> {
     debug!("new steps page request: {:?}", payload);
-    let result = storage
+    let _result = storage
         .into_inner()
-        .send(StorageCmd::CreatePage(payload.into_inner()))
+        .send(StorageCmd::CreateStepsPage(payload.into_inner()))
         .await?;
     Ok(HttpResponse::Ok().json(PageAccess{
         admin_secret: "ADMIN_SECRET".to_string(), 

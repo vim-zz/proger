@@ -22,15 +22,15 @@ impl<T: StorageDriver> Handler<StorageCmd> for StorageExecutor<T> {
 
     fn handle(&mut self, cmd: StorageCmd, _: &mut Self::Context) -> Self::Result {
         // Insert the session into the database
-        println!("Creating new page: {:?}", cmd);
+        println!("New command: {:?}", cmd);
         self.driver.write(cmd)?;
         Ok(PageModel{
-            id: "BANANA".to_string(),
             hashed_secret: "BANANA".to_string(),
             link: "BANANA".to_string(),
             steps: 0,
             start: 0,
             completed: 0,
+            epoch_time: 0,
         })
     }
 }
