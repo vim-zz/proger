@@ -24,12 +24,14 @@ impl StorageDriver for DynamoDbDriver {
 
                 let model = PageModel {
                     hashed_secret: "HASHED_SECRET".to_string(),
+                    // TODO generate random unique link
                     link: "LINK".to_string(),
                     steps: request.steps,
                     start: request.start,
                     completed: request.start,
                     epoch_time,
                 };
+                println!("writing {:?}", model);
                 
                 let result = rt.block_on(
                     self.0.put_item(PutItemInput {
@@ -37,7 +39,7 @@ impl StorageDriver for DynamoDbDriver {
                         item: serde_dynamodb::to_hashmap(&model)?,
                         ..PutItemInput::default()
                     })
-                );
+                )?;
                 println!("done! WR {:?}", result);
 
                 Ok(model)
@@ -50,13 +52,15 @@ impl StorageDriver for DynamoDbDriver {
             StorageCmd::GetStepsPage(link) => {
                 let model = PageModel {
                     hashed_secret: "0".to_string(),
-                    link: "0".to_string(),
+                    link,
                     steps: 0,
                     start: 0,
                     completed: 0,
                     epoch_time: 0,
                 };
 
+                println!("reading {:?}", model);
+                
                 let result = rt.block_on(
                     self.0.get_item(GetItemInput {
                         table_name: "proger-pages".to_string(),

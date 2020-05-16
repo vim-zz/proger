@@ -52,7 +52,7 @@ pub fn create_testserver(storage: DynamoDbDriver) -> Result<Url> {
 
 #[test]
 fn test_new_page_with_dynamodb() {
-    let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::UsEast1));
+    let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::EuCentral1));
     let mut url = create_testserver(db_driver).unwrap();
     url.set_path(API_URL_V1_NEW_STEP_PAGE);
     println!("new page with {:?}", url);
@@ -74,9 +74,9 @@ fn test_new_page_with_dynamodb() {
 
 #[test]
 fn test_get_page_with_dynamodb() {
-    let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::UsEast1));
+    let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::EuCentral1));
     let mut url = create_testserver(db_driver).unwrap();
-    url.set_path(&API_URL_V1_VIEW_PAGE.replace("{id}", "TEST_PAGE_ID"));
+    url.set_path(&API_URL_V1_VIEW_PAGE.replace("{id}", "LINK"));
     println!("view page at {:?}", url);
 
     // When
