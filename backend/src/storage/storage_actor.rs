@@ -4,13 +4,19 @@ use proger_core::protocol::model::PageModel;
 use crate::storage::storage_driver::{StorageDriver, StorageCmd};
 use actix::{Actor, SyncContext, Message, Handler};
 use log::{debug, info};
+use tokio::runtime::Runtime;
 
 pub struct StorageExecutor<T: StorageDriver> {
     pub driver: T,
+    pub rt: Runtime,
 }
 
 impl<T: StorageDriver> Actor for StorageExecutor<T> {
     type Context = SyncContext<Self>;
+
+    fn started(&mut self, _ctx: &mut Self::Context) {
+       println!("DB actor is up and running");
+    }
 }
 
 impl Message for StorageCmd {
@@ -23,14 +29,7 @@ impl<T: StorageDriver> Handler<StorageCmd> for StorageExecutor<T> {
     fn handle(&mut self, cmd: StorageCmd, _: &mut Self::Context) -> Self::Result {
         // Insert the session into the database
         println!("New command: {:?}", cmd);
-        self.driver.write(cmd)?;
-        Ok(PageModel{
-            hashed_secret: "BANANA".to_string(),
-            link: "BANANA".to_string(),
-            steps: 0,
-            start: 0,
-            completed: 0,
-            epoch_time: 0,
-        })
+        let model = self.driver.execute(&mut self.rt, cmd)?;
+        Ok(model)
     }
 }

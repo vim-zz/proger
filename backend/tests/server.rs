@@ -13,12 +13,14 @@ use proger_core::{
     API_URL_V1_NEW_STEP_PAGE,
     protocol::request::NewStepsPage,
 };
+use proger_core::protocol::model::PageModel;
+use tokio::runtime::Runtime;
 
 mock! {
     pub DynamoDbDriver {}
     trait StorageDriver {
         fn connect(&self) -> Result<()>;
-        fn write(&self, cmd: StorageCmd) -> Result<()>;
+        fn execute(&self, rt: &mut Runtime, cmd: StorageCmd) -> Result<PageModel>;
     }
     trait Clone {
         fn clone(&self) -> Self;
@@ -82,8 +84,15 @@ fn test_server_new_page() {
         .expect_clone()
         .returning(|| {
             let mut mock2 = MockDynamoDbDriver::new();
-            mock2.expect_write()
-                .returning(|_| Ok(()));
+            mock2.expect_execute()
+                .returning(|_, _| Ok(PageModel{
+                    hashed_secret: "HASHED_SECRET".to_string(),
+                    link: "LINK".to_string(),
+                    steps: 0,
+                    start: 0,
+                    completed: 0,
+                    epoch_time: 0,
+                }));
             mock2
         });
 

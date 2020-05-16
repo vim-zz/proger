@@ -1,4 +1,4 @@
-use rusoto_dynamodb::{DynamoDb, DynamoDbClient, PutItemInput};
+use rusoto_dynamodb::{DynamoDb, DynamoDbClient, PutItemInput, GetItemInput};
 use proger_core::protocol::model::PageModel;
 use crate::storage::storage_driver::{StorageDriver, StorageCmd};
 use tokio::runtime::Runtime;
@@ -13,7 +13,7 @@ impl StorageDriver for DynamoDbDriver {
         Ok(())
     }
 
-    fn write(&self, cmd: StorageCmd) -> Result<()> {
+    fn execute(&self, rt: &mut Runtime, cmd: StorageCmd) -> Result<PageModel> {
         println!("writing to db {:?}", cmd);
         match cmd {
             StorageCmd::CreateStepsPage(request) => {
@@ -31,22 +31,42 @@ impl StorageDriver for DynamoDbDriver {
                     epoch_time,
                 };
                 
-                let mut runtime = Runtime::new()?;
-                println!("new runtime...");
-
-                runtime.block_on(
+                let result = rt.block_on(
                     self.0.put_item(PutItemInput {
                         table_name: "proger-pages".to_string(),
                         item: serde_dynamodb::to_hashmap(&model)?,
                         ..PutItemInput::default()
                     })
                 );
-                println!("done! WR");
+                println!("done! WR {:?}", result);
 
-                Ok(())
+                Ok(model)
             },
+
             StorageCmd::UpdateStepsPage(request) => {
-                Ok(())
+                todo!()
+            },
+
+            StorageCmd::GetStepsPage(link) => {
+                let model = PageModel {
+                    hashed_secret: "0".to_string(),
+                    link: "0".to_string(),
+                    steps: 0,
+                    start: 0,
+                    completed: 0,
+                    epoch_time: 0,
+                };
+
+                let result = rt.block_on(
+                    self.0.get_item(GetItemInput {
+                        table_name: "proger-pages".to_string(),
+                        key: serde_dynamodb::to_hashmap(&model)?,
+                        ..GetItemInput::default()
+                    })
+                );
+                println!("done! RD, {:?}", result);
+
+                Ok(model)
             },
 
         }

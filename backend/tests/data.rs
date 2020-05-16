@@ -6,10 +6,10 @@ use anyhow::{anyhow, Result};
 use url::Url;
 use reqwest::blocking::Client;
 use std::thread;
-use mockall::*;
 use std::time::Duration;
 use proger_core::{
     API_URL_V1_NEW_STEP_PAGE,
+    API_URL_V1_VIEW_PAGE,
     protocol::request::NewStepsPage,
 };
 use rusoto_core::Region;
@@ -55,7 +55,7 @@ fn test_new_page_with_dynamodb() {
     let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::UsEast1));
     let mut url = create_testserver(db_driver).unwrap();
     url.set_path(API_URL_V1_NEW_STEP_PAGE);
-    println!("accessing {:?}", url);
+    println!("new page with {:?}", url);
 
     // When
     let request = NewStepsPage {
@@ -65,6 +65,23 @@ fn test_new_page_with_dynamodb() {
     let res = Client::new()
         .post(url.as_str())
         .json(&request)
+        .send().unwrap();
+
+    // Then
+    println!("result: {:?}", res);
+    assert_eq!(res.status().as_u16(), 200);
+}
+
+#[test]
+fn test_get_page_with_dynamodb() {
+    let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::UsEast1));
+    let mut url = create_testserver(db_driver).unwrap();
+    url.set_path(&API_URL_V1_VIEW_PAGE.replace("{id}", "TEST_PAGE_ID"));
+    println!("view page at {:?}", url);
+
+    // When
+    let res = Client::new()
+        .get(url.as_str())
         .send().unwrap();
 
     // Then
