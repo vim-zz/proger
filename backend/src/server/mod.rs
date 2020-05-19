@@ -1,26 +1,16 @@
-use anyhow::Result;
-use actix::{SystemRunner, System, SyncArbiter};
+use crate::http::{new_steps_page, set_steps_page, view_page};
+use crate::storage::storage_actor::StorageExecutor;
+use crate::storage::storage_driver::StorageDriver;
+use actix::{SyncArbiter, System, SystemRunner};
 use actix_files::Files;
 use actix_web::{
     middleware,
-    web::{get, put, post, resource},
-    App,
-    HttpServer,
+    web::{get, post, put, resource},
+    App, HttpServer,
 };
-use crate::storage::storage_driver::StorageDriver;
-use crate::storage::storage_actor::StorageExecutor;
-use crate::http::{
-    new_steps_page,
-    set_steps_page,
-    view_page,
-};
-use proger_core::{
-    API_URL_V1_NEW_STEP_PAGE,
-    API_URL_V1_SET_STEP,
-    API_URL_V1_VIEW_PAGE,
-};
+use anyhow::Result;
+use proger_core::{API_URL_V1_NEW_STEP_PAGE, API_URL_V1_SET_STEP, API_URL_V1_VIEW_PAGE};
 use tokio::runtime::Runtime;
-
 
 /// The server instance
 pub struct Server {
@@ -28,10 +18,7 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new<T: StorageDriver + Sync + Send + Clone>(
-        host: String,
-        storage: T
-    ) -> Result<Self> {
+    pub fn new<T: StorageDriver + Sync + Send + Clone>(host: String, storage: T) -> Result<Self> {
         // Build a new actor system
         let runner = System::new("backend");
 
@@ -55,7 +42,7 @@ impl Server {
 
         server.bind(host.as_str())?.run();
 
-        Ok(Server{runner})
+        Ok(Server { runner })
     }
 
     /// Start the server

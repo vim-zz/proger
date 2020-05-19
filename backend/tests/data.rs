@@ -1,36 +1,25 @@
-use proger_backend::{
-    Server, 
-    DynamoDbDriver,
-};
 use anyhow::{anyhow, Result};
-use url::Url;
+use proger_backend::{DynamoDbDriver, Server};
+use proger_core::{
+    protocol::request::{NewStepsPage, SetStepsPage},
+    API_URL_V1_NEW_STEP_PAGE, API_URL_V1_SET_STEP, API_URL_V1_VIEW_PAGE,
+};
 use reqwest::blocking::Client;
+use rusoto_core::Region;
+use rusoto_dynamodb::DynamoDbClient;
 use std::thread;
 use std::time::Duration;
-use proger_core::{
-    API_URL_V1_NEW_STEP_PAGE,
-    API_URL_V1_VIEW_PAGE,
-    protocol::request::NewStepsPage,
-};
-use rusoto_core::Region;
-use std::str::FromStr;
-
-use rusoto_dynamodb::DynamoDbClient;
+use url::Url;
 
 pub fn create_testserver(storage: DynamoDbDriver) -> Result<Url> {
     // Set the test configuration
     let host = "localhost:8080".to_string();
     // url.set_port(Some(get_next_port()))
     //     .map_err(|_| format_err!("Unable to set server port"))?;
-    
+
     // Start the server
     let host_clone = host.clone();
-    thread::spawn(move || {
-        Server::new(
-            host_clone,
-            storage,
-        ).unwrap().start().unwrap()
-    });
+    thread::spawn(move || Server::new(host_clone, storage).unwrap().start().unwrap());
 
     // Wait until the server is up
     let url = Url::parse(&format!("http://{}", &host))?;
@@ -57,18 +46,41 @@ fn test_new_page_with_dynamodb() {
     url.set_path(API_URL_V1_NEW_STEP_PAGE);
     println!("new page with {:?}", url);
 
-    // When
     let request = NewStepsPage {
-        steps: 10,
-        start: 1,
+        steps: 20,
+        start: 5,
     };
     let res = Client::new()
         .post(url.as_str())
         .json(&request)
-        .send().unwrap();
+        .send()
+        .unwrap();
 
     // Then
-    println!("result: {:?}", res);
+    println!("NEW: {:?}", res);
+    assert_eq!(res.status().as_u16(), 200);
+}
+
+#[test]
+fn test_update_page_with_dynamodb() {
+    let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::EuCentral1));
+    let mut url = create_testserver(db_driver).unwrap();
+    url.set_path(&API_URL_V1_SET_STEP.replace("{id}", "LINK"));
+    println!("update page at {:?}", url);
+
+    let request = SetStepsPage {
+        completed: 7,
+        admin_secret: "SECRET".to_string(),
+    };
+
+    let res = Client::new()
+        .put(url.as_str())
+        .json(&request)
+        .send()
+        .unwrap();
+
+    // Then
+    println!("UPDATE: {:?}", res);
     assert_eq!(res.status().as_u16(), 200);
 }
 
@@ -79,12 +91,9 @@ fn test_get_page_with_dynamodb() {
     url.set_path(&API_URL_V1_VIEW_PAGE.replace("{id}", "LINK"));
     println!("view page at {:?}", url);
 
-    // When
-    let res = Client::new()
-        .get(url.as_str())
-        .send().unwrap();
+    let res = Client::new().get(url.as_str()).send().unwrap();
 
     // Then
-    println!("result: {:?}", res);
+    println!("GET: {:?}", res);
     assert_eq!(res.status().as_u16(), 200);
 }

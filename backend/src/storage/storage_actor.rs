@@ -1,9 +1,9 @@
 use anyhow::Result;
 // use crate::server::StorageDriver;
-use proger_core::protocol::model::PageModel;
-use crate::storage::storage_driver::{StorageDriver, StorageCmd};
-use actix::{Actor, SyncContext, Message, Handler};
+use crate::storage::storage_driver::{StorageCmd, StorageDriver};
+use actix::{Actor, Handler, Message, SyncContext};
 use log::{debug, info};
+use proger_core::protocol::model::PageModel;
 use tokio::runtime::Runtime;
 
 pub struct StorageExecutor<T: StorageDriver> {
@@ -15,7 +15,7 @@ impl<T: StorageDriver> Actor for StorageExecutor<T> {
     type Context = SyncContext<Self>;
 
     fn started(&mut self, _ctx: &mut Self::Context) {
-       println!("DB actor is up and running");
+        println!("DB actor is up and running");
     }
 }
 

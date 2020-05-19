@@ -1,18 +1,13 @@
 use log::debug;
 
-use actix_web::{
-    web::{
-        Path,
-        Data,
-    },
-    HttpResponse,
-    Error,
-};
 use crate::StorageExecutor;
+use actix_web::{
+    web::{Data, Path},
+    Error, HttpResponse,
+};
 
-use crate::storage::storage_driver::{StorageDriver, StorageCmd};
+use crate::storage::storage_driver::{StorageCmd, StorageDriver};
 use actix::Addr;
-
 
 pub async fn view_page<T: StorageDriver>(
     link: Path<String>,
@@ -27,7 +22,7 @@ pub async fn view_page<T: StorageDriver>(
 
     println!("result: {:?}", result);
     // Ok(HttpResponse::Ok().json(PageAccess{
-    //     admin_secret: "ADMIN_SECRET".to_string(), 
+    //     admin_secret: "ADMIN_SECRET".to_string(),
     //     link: "PRIVATE_LINK".to_string(),
     // }))
 

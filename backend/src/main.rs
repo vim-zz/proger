@@ -1,14 +1,12 @@
 use anyhow::Result;
 use log::info;
-use std::env;
-use proger_backend::{Server, DynamoDbDriver};
+use proger_backend::{DynamoDbDriver, Server};
 use rusoto_core::Region;
 use rusoto_dynamodb::DynamoDbClient;
+use std::env;
 use std::str::FromStr;
 
-
 fn main() -> Result<()> {
-
     // Set the logging verbosity
     env::set_var(
         "RUST_LOG",
