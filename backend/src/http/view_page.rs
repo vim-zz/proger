@@ -5,6 +5,7 @@ use actix_web::{
     web::{Data, Path},
     Error, HttpResponse,
 };
+use proger_core::protocol::response::Progress;
 
 use crate::storage::storage_driver::{StorageCmd, StorageDriver};
 use actix::Addr;
@@ -21,10 +22,13 @@ pub async fn view_page<T: StorageDriver>(
         .await?;
 
     println!("result: {:?}", result);
-    // Ok(HttpResponse::Ok().json(PageAccess{
-    //     admin_secret: "ADMIN_SECRET".to_string(),
-    //     link: "PRIVATE_LINK".to_string(),
-    // }))
-
-    Ok(HttpResponse::Ok().finish())
+    match result {
+        Ok(page) => Ok(HttpResponse::Ok().json(Progress {
+            steps: page.steps,
+            start: page.start,
+            completed: page.completed,
+            updated: page.updated,
+        })),
+        Err(e) => Ok(HttpResponse::BadRequest().finish()),
+    }
 }

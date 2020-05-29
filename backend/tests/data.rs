@@ -1,8 +1,11 @@
 use anyhow::{anyhow, Result};
 use proger_backend::{DynamoDbDriver, Server};
 use proger_core::{
-    protocol::request::{NewStepsPage, SetStepsPage},
-    API_URL_V1_NEW_STEP_PAGE, API_URL_V1_SET_STEP, API_URL_V1_VIEW_PAGE,
+    protocol::{
+        request::{DeleteStepsPage, NewStepsPage, SetStepsPage},
+        response::{PageAccess, Progress},
+    },
+    API_URL_V1_DELETE_PAGE, API_URL_V1_NEW_STEP_PAGE, API_URL_V1_SET_STEP, API_URL_V1_VIEW_PAGE,
 };
 use reqwest::blocking::Client;
 use rusoto_core::Region;
@@ -40,60 +43,89 @@ pub fn create_testserver(storage: DynamoDbDriver) -> Result<Url> {
 }
 
 #[test]
-fn test_new_page_with_dynamodb() {
+fn test_flow_with_dynamodb() {
     let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::EuCentral1));
-    let mut url = create_testserver(db_driver).unwrap();
-    url.set_path(API_URL_V1_NEW_STEP_PAGE);
-    println!("new page with {:?}", url);
+    let url = create_testserver(db_driver).unwrap();
 
-    let request = NewStepsPage {
+    // Create
+    let create_request = NewStepsPage {
         steps: 20,
         start: 5,
     };
+    let mut create_url = url.clone();
+    create_url.set_path(API_URL_V1_NEW_STEP_PAGE);
+    println!("new page URL: {:?}", create_url);
+    let result = create_new_page_with_dynamodb(create_url, create_request);
+    println!("RESULT: {:?}", result);
+    let page_acess: PageAccess = result.json().unwrap();
+    println!("PageAccess: {:?}", page_acess);
+
+    // Update
+    let update_request = SetStepsPage {
+        completed: 7,
+        admin_secret: page_acess.admin_secret.clone(),
+    };
+    let mut update_url = url.clone();
+    update_url.set_path(&API_URL_V1_SET_STEP.replace("{id}", &page_acess.link));
+    println!("update page URL: {:?}", update_url);
+    let result = update_page_with_dynamodb(update_url, update_request);
+    println!("RESULT: {:?}", result);
+
+    // Read
+    let mut read_url = url.clone();
+    read_url.set_path(&API_URL_V1_VIEW_PAGE.replace("{id}", &page_acess.link));
+    println!("view page URL: {:?}", read_url);
+    let result = view_page_with_dynamodb(read_url);
+    println!("RESULT: {:?}", result);
+    let progress: Progress = result.json().unwrap();
+    println!("Progress: {:?}", progress);
+    assert_eq!(progress.steps, 20);
+    assert_eq!(progress.start, 5);
+    assert_eq!(progress.completed, 7);
+
+    // Delete
+    let delete_request = DeleteStepsPage {
+        admin_secret: page_acess.admin_secret.clone(),
+    };
+    let mut delete_url = url.clone();
+    delete_url.set_path(&API_URL_V1_DELETE_PAGE.replace("{id}", &page_acess.link));
+    println!("delete page URL: {:?}", delete_request);
+    let result = delete_page_with_dynamodb(delete_url, delete_request);
+    println!("RESULT: {:?}", result);
+}
+
+fn create_new_page_with_dynamodb(url: Url, request: NewStepsPage) -> reqwest::blocking::Response {
     let res = Client::new()
         .post(url.as_str())
         .json(&request)
         .send()
         .unwrap();
-
-    // Then
-    println!("NEW: {:?}", res);
     assert_eq!(res.status().as_u16(), 200);
+    res
 }
 
-#[test]
-fn test_update_page_with_dynamodb() {
-    let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::EuCentral1));
-    let mut url = create_testserver(db_driver).unwrap();
-    url.set_path(&API_URL_V1_SET_STEP.replace("{id}", "LINK"));
-    println!("update page at {:?}", url);
-
-    let request = SetStepsPage {
-        completed: 7,
-        admin_secret: "SECRET".to_string(),
-    };
-
+fn update_page_with_dynamodb(url: Url, request: SetStepsPage) -> reqwest::blocking::Response {
     let res = Client::new()
         .put(url.as_str())
         .json(&request)
         .send()
         .unwrap();
-
-    // Then
-    println!("UPDATE: {:?}", res);
     assert_eq!(res.status().as_u16(), 200);
+    res
 }
 
-#[test]
-fn test_get_page_with_dynamodb() {
-    let db_driver = DynamoDbDriver(DynamoDbClient::new(Region::EuCentral1));
-    let mut url = create_testserver(db_driver).unwrap();
-    url.set_path(&API_URL_V1_VIEW_PAGE.replace("{id}", "LINK"));
-    println!("view page at {:?}", url);
-
+fn view_page_with_dynamodb(url: Url) -> reqwest::blocking::Response {
     let res = Client::new().get(url.as_str()).send().unwrap();
-
-    // Then
-    println!("GET: {:?}", res);
     assert_eq!(res.status().as_u16(), 200);
+    res
+}
+
+fn delete_page_with_dynamodb(url: Url, request: DeleteStepsPage) -> reqwest::blocking::Response {
+    let res = Client::new()
+        .delete(url.as_str())
+        .json(&request)
+        .send()
+        .unwrap();
+    assert_eq!(res.status().as_u16(), 200);
+    res
 }

@@ -2,3 +2,6 @@
 # `cargo make`
 # Or
 # `makers`
+
+[env]
+AWS_PROFILE = "proger@app"

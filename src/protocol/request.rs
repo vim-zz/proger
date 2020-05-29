@@ -12,8 +12,14 @@ pub struct NewStepsPage {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
-/// Set  steps as done
+/// Set steps
 pub struct SetStepsPage {
     pub completed: u32,
+    pub admin_secret: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+/// Delete steps page
+pub struct DeleteStepsPage {
     pub admin_secret: String,
 }

@@ -22,7 +22,7 @@ mock! {
 
 pub fn create_testserver(storage: MockDynamoDbDriver) -> Result<Url> {
     // Set the test configuration
-    let host = "localhost:8080".to_string();
+    let host = "localhost:8081".to_string();
     // url.set_port(Some(get_next_port()))
     //     .map_err(|_| format_err!("Unable to set server port"))?;
 
@@ -68,7 +68,7 @@ fn test_server_new_page() {
         mock2.expect_execute().returning(|_, _| {
             Ok(PageModel {
                 link: "LINK".to_string(),
-                hashed_secret: "HASHED_SECRET".to_string(),
+                secret: "HASHED_SECRET".to_string(),
                 steps: 0,
                 start: 0,
                 completed: 0,

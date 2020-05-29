@@ -8,7 +8,7 @@ pub struct PageModel {
     pub link: String,
     /// This field is a result of the secret, it is sotred in the database
     /// and allows to verify the seceret access credentials
-    pub hashed_secret: String,
+    pub secret: String,
     /// Amount of steps
     pub steps: u32,
     /// First step

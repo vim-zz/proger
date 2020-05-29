@@ -1,7 +1,7 @@
-use crate::storage::storage_driver::{StorageCmd, StorageDriver};
+use crate::storage::storage_driver::{self, StorageCmd, StorageDriver, StorageError};
 use anyhow::{anyhow, Result};
 use proger_core::protocol::model::PageModel;
-use rusoto_dynamodb::{DynamoDb, DynamoDbClient, GetItemInput, PutItemInput};
+use rusoto_dynamodb::{DeleteItemInput, DynamoDb, DynamoDbClient, GetItemInput, PutItemInput};
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::runtime::Runtime;
@@ -20,8 +20,6 @@ impl DynamoDbDriver {
     fn read(&self, rt: &mut Runtime, link: String) -> Result<PageModel> {
         let key = PageModelKey { link };
 
-        println!("reading {:?}", key);
-
         let result = rt.block_on(self.0.get_item(GetItemInput {
             table_name: "proger-pages".to_string(),
             key: serde_dynamodb::to_hashmap(&key)?,
@@ -32,7 +30,7 @@ impl DynamoDbDriver {
         if let Some(item) = result.item {
             Ok(serde_dynamodb::from_hashmap(item)?)
         } else {
-            Err(anyhow!("read empty item"))
+            Err(anyhow!(StorageError::CorruptedItem))
         }
     }
 
@@ -43,6 +41,19 @@ impl DynamoDbDriver {
             ..PutItemInput::default()
         }))?;
         println!("WRITE: {:?}", result);
+
+        Ok(())
+    }
+
+    fn delete(&self, rt: &mut Runtime, link: String) -> Result<()> {
+        let key = PageModelKey { link };
+
+        let result = rt.block_on(self.0.delete_item(DeleteItemInput {
+            table_name: "proger-pages".to_string(),
+            key: serde_dynamodb::to_hashmap(&key)?,
+            ..DeleteItemInput::default()
+        }))?;
+        println!("DELETE: {:?}", result);
 
         Ok(())
     }
@@ -58,10 +69,10 @@ impl StorageDriver for DynamoDbDriver {
         match cmd {
             StorageCmd::CreateStepsPage(request) => {
                 let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
-                let model = PageModel {
-                    // TODO generate random unique link
-                    link: "LINK".to_string(),
-                    hashed_secret: "HASHED_SECRET".to_string(),
+                let password = storage_driver::generate_secret();
+                let mut model = PageModel {
+                    link: storage_driver::generate_link(),
+                    secret: storage_driver::hash_secret(&password),
                     steps: request.steps,
                     start: request.start,
                     completed: request.start,
@@ -71,15 +82,35 @@ impl StorageDriver for DynamoDbDriver {
 
                 self.write(rt, &model)?;
 
+                // return the real password to the user
+                model.secret = password;
                 Ok(model)
             }
 
             StorageCmd::UpdateStepsPage(link, request) => {
                 let mut model = self.read(rt, link)?;
-                model.completed = request.completed;
-                model.updated = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
-                self.write(rt, &model)?;
-                Ok(model)
+                let hashed_input_password = &storage_driver::hash_secret(&request.admin_secret);
+                let stored_hash = &model.secret;
+                if stored_hash == hashed_input_password {
+                    model.completed = request.completed;
+                    model.updated = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+                    self.write(rt, &model)?;
+                    Ok(model)
+                } else {
+                    Err(anyhow!(StorageError::WrongPassword))
+                }
+            }
+
+            StorageCmd::DeleteStepsPage(link, request) => {
+                let model = self.read(rt, link.clone())?;
+                let hashed_input_password = &storage_driver::hash_secret(&request.admin_secret);
+                let stored_hash = &model.secret;
+                if stored_hash == hashed_input_password {
+                    self.delete(rt, link)?;
+                    Ok(model)
+                } else {
+                    Err(anyhow!(StorageError::WrongPassword))
+                }
             }
 
             StorageCmd::GetStepsPage(link) => self.read(rt, link),

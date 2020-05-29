@@ -17,3 +17,4 @@ extern crate diesel;
 pub const API_URL_V1_NEW_STEP_PAGE: &str = "v1/step/new";
 pub const API_URL_V1_SET_STEP: &str = "v1/step/set/{id}";
 pub const API_URL_V1_VIEW_PAGE: &str = "v1/{id}";
+pub const API_URL_V1_DELETE_PAGE: &str = "v1/step/rm/{id}";
