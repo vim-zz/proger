@@ -1,6 +1,8 @@
 use anyhow::Result;
-use proger_core::protocol::model::PageModel;
-use proger_core::protocol::request::{DeleteStepsPage, NewStepsPage, SetStepsPage};
+use proger_core::protocol::{
+    model::StepPageModel,
+    request::{DeleteStepPage, CreateStepPage, UpdateStepPage},
+};
 use rand::{distributions::Alphanumeric, Rng};
 use sha3::{Digest, Sha3_256};
 use thiserror::Error;
@@ -14,10 +16,10 @@ const PASSWORD_LEN: usize = 30;
 /// The create session message
 #[derive(Debug)]
 pub enum StorageCmd {
-    CreateStepsPage(NewStepsPage),
-    UpdateStepsPage(String, SetStepsPage),
-    DeleteStepsPage(String, DeleteStepsPage),
-    GetStepsPage(String),
+    CreateStepPage(CreateStepPage),
+    ReadStepPage(String),
+    UpdateStepPage(String, UpdateStepPage),
+    DeleteStepPage(String, DeleteStepPage),
 }
 
 #[derive(Error, Debug)]
@@ -33,7 +35,7 @@ pub enum StorageError {
 /// Trait to allow different database backend
 pub trait StorageDriver: 'static + Unpin {
     fn connect(&self) -> Result<()>;
-    fn execute(&self, rt: &mut Runtime, cmd: StorageCmd) -> Result<PageModel>;
+    fn execute(&self, rt: &mut Runtime, cmd: StorageCmd) -> Result<StepPageModel>;
 }
 
 pub fn generate_link() -> String {

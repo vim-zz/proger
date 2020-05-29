@@ -1,9 +1,9 @@
-pub mod delete_steps_page;
-pub mod new_steps_page;
-pub mod set_steps_page;
-pub mod view_page;
+pub mod delete_step_page;
+pub mod create_step_page;
+pub mod update_step_page;
+pub mod read_step_page;
 
-pub use crate::http::delete_steps_page::delete_steps_page;
-pub use crate::http::new_steps_page::new_steps_page;
-pub use crate::http::set_steps_page::set_steps_page;
-pub use crate::http::view_page::view_page;
+pub use crate::http::delete_step_page::delete_step_page;
+pub use crate::http::create_step_page::create_step_page;
+pub use crate::http::update_step_page::update_step_page;
+pub use crate::http::read_step_page::read_step_page;

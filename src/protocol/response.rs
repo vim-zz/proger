@@ -1,5 +1,9 @@
 //! Response specific implementations
 use serde::{Deserialize, Serialize};
+use chrono::{
+    DateTime, Utc,
+    serde::ts_seconds
+};
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 /// The new page response
@@ -13,13 +17,12 @@ pub struct PageAccess {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 /// The progress status response
-pub struct Progress {
+pub struct StepPageProgress {
     /// last step to complete
-    pub steps: u32,
-    /// first step
-    pub start: u32,
+    pub steps: u64,
     /// progress indocation 
-    pub completed: u32,
+    pub completed: u64,
     /// latest update time (seconds since epoch)
-    pub updated: u64,
+    #[serde(with = "ts_seconds")]
+    pub updated: DateTime<Utc>,
 }

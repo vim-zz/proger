@@ -3,21 +3,19 @@ use actix_web::{
     web::{Data, Json, Path},
     Error, HttpResponse,
 };
-use log::debug;
-use proger_core::protocol::request::DeleteStepsPage;
+use proger_core::protocol::request::DeleteStepPage;
 
 use crate::storage::storage_driver::{StorageCmd, StorageDriver};
 use actix::Addr;
 
-pub async fn delete_steps_page<T: StorageDriver>(
+pub async fn delete_step_page<T: StorageDriver>(
     link: Path<String>,
-    payload: Json<DeleteStepsPage>,
+    payload: Json<DeleteStepPage>,
     storage: Data<Addr<StorageExecutor<T>>>,
 ) -> Result<HttpResponse, Error> {
-    debug!("new steps page request: {:?}", payload);
     let _result = storage
         .into_inner()
-        .send(StorageCmd::DeleteStepsPage(
+        .send(StorageCmd::DeleteStepPage(
             link.to_string(),
             payload.into_inner(),
         ))

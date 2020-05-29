@@ -7,14 +7,15 @@ pub mod protocol;
 #[macro_use]
 extern crate diesel;
 
-// macro_rules! apis {
-//     ($($name:ident => $content:expr,)*) => (
-//         $(#[allow(missing_docs)] pub const $name: &str = $content;)*
-//     )
-// }
+macro_rules! apis {
+    ($($name:ident => $content:expr,)*) => (
+        $(#[allow(missing_docs)] pub const $name: &str = $content;)*
+    )
+}
 
-#[allow(missing_docs)]
-pub const API_URL_V1_NEW_STEP_PAGE: &str = "v1/step/new";
-pub const API_URL_V1_SET_STEP: &str = "v1/step/set/{id}";
-pub const API_URL_V1_VIEW_PAGE: &str = "v1/{id}";
-pub const API_URL_V1_DELETE_PAGE: &str = "v1/step/rm/{id}";
+apis!{
+    API_URL_V1_CREATE_STEP_PAGE => "v1/step/create",
+    API_URL_V1_READ_STEP_PAGE => "v1/step/{id}",
+    API_URL_V1_UPDATE_STEP_PAGE => "v1/step/update/{id}",
+    API_URL_V1_DELETE_PAGE => "v1/step/delete/{id}",
+}

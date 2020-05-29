@@ -2,8 +2,7 @@ use anyhow::Result;
 // use crate::server::StorageDriver;
 use crate::storage::storage_driver::{StorageCmd, StorageDriver};
 use actix::{Actor, Handler, Message, SyncContext};
-use log::{debug, info};
-use proger_core::protocol::model::PageModel;
+use proger_core::protocol::model::StepPageModel;
 use tokio::runtime::Runtime;
 
 pub struct StorageExecutor<T: StorageDriver> {
@@ -20,11 +19,11 @@ impl<T: StorageDriver> Actor for StorageExecutor<T> {
 }
 
 impl Message for StorageCmd {
-    type Result = Result<PageModel>;
+    type Result = Result<StepPageModel>;
 }
 
 impl<T: StorageDriver> Handler<StorageCmd> for StorageExecutor<T> {
-    type Result = Result<PageModel>;
+    type Result = Result<StepPageModel>;
 
     fn handle(&mut self, cmd: StorageCmd, _: &mut Self::Context) -> Self::Result {
         // Insert the session into the database

@@ -1,19 +1,20 @@
 use anyhow::{anyhow, Result};
 use mockall::*;
 use proger_backend::{Server, StorageCmd, StorageDriver};
-use proger_core::protocol::model::PageModel;
-use proger_core::{protocol::request::NewStepsPage, API_URL_V1_NEW_STEP_PAGE};
+use proger_core::protocol::model::StepPageModel;
+use proger_core::{protocol::request::CreateStepPage, API_URL_V1_CREATE_STEP_PAGE};
 use reqwest::blocking::Client;
 use std::thread;
 use std::time::Duration;
 use tokio::runtime::Runtime;
 use url::Url;
+use chrono::Utc;
 
 mock! {
     pub DynamoDbDriver {}
     trait StorageDriver {
         fn connect(&self) -> Result<()>;
-        fn execute(&self, rt: &mut Runtime, cmd: StorageCmd) -> Result<PageModel>;
+        fn execute(&self, rt: &mut Runtime, cmd: StorageCmd) -> Result<StepPageModel>;
     }
     trait Clone {
         fn clone(&self) -> Self;
@@ -66,27 +67,26 @@ fn test_server_new_page() {
     mock1.expect_clone().returning(|| {
         let mut mock2 = MockDynamoDbDriver::new();
         mock2.expect_execute().returning(|_, _| {
-            Ok(PageModel {
+            Ok(StepPageModel {
                 link: "LINK".to_string(),
                 secret: "HASHED_SECRET".to_string(),
                 steps: 0,
-                start: 0,
                 completed: 0,
-                created: 0,
-                updated: 0,
+                progress: vec![],
+                created: Utc::now(),
+                updated: Utc::now(),
             })
         });
         mock2
     });
 
     let mut url = create_testserver(mock1).unwrap();
-    url.set_path(API_URL_V1_NEW_STEP_PAGE);
+    url.set_path(API_URL_V1_CREATE_STEP_PAGE);
     println!("accessing {:?}", url);
 
     // When
-    let request = NewStepsPage {
+    let request = CreateStepPage {
         steps: 10,
-        start: 1,
     };
     let res = Client::new()
         .post(url.as_str())

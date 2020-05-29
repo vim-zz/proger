@@ -1,6 +1,8 @@
-use crate::http::{delete_steps_page, new_steps_page, set_steps_page, view_page};
-use crate::storage::storage_actor::StorageExecutor;
-use crate::storage::storage_driver::StorageDriver;
+use crate::http::{delete_step_page, create_step_page, update_step_page, read_step_page};
+use crate::storage::{
+    storage_actor::StorageExecutor,
+    storage_driver::StorageDriver,
+};
 use actix::{SyncArbiter, System, SystemRunner};
 use actix_files::Files;
 use actix_web::{
@@ -10,7 +12,7 @@ use actix_web::{
 };
 use anyhow::Result;
 use proger_core::{
-    API_URL_V1_DELETE_PAGE, API_URL_V1_NEW_STEP_PAGE, API_URL_V1_SET_STEP, API_URL_V1_VIEW_PAGE,
+    API_URL_V1_DELETE_PAGE, API_URL_V1_CREATE_STEP_PAGE, API_URL_V1_UPDATE_STEP_PAGE, API_URL_V1_READ_STEP_PAGE,
 };
 use tokio::runtime::Runtime;
 
@@ -36,12 +38,12 @@ impl Server {
             App::new()
                 .wrap(middleware::Logger::default())
                 .data(storage_executor.clone())
-                .service(resource(API_URL_V1_NEW_STEP_PAGE).route(post().to(new_steps_page::<T>)))
-                .service(resource(API_URL_V1_SET_STEP).route(put().to(set_steps_page::<T>)))
+                .service(resource(API_URL_V1_CREATE_STEP_PAGE).route(post().to(create_step_page::<T>)))
+                .service(resource(API_URL_V1_UPDATE_STEP_PAGE).route(put().to(update_step_page::<T>)))
                 .service(
-                    resource(API_URL_V1_DELETE_PAGE).route(delete().to(delete_steps_page::<T>)),
+                    resource(API_URL_V1_DELETE_PAGE).route(delete().to(delete_step_page::<T>)),
                 )
-                .service(resource(API_URL_V1_VIEW_PAGE).route(get().to(view_page::<T>)))
+                .service(resource(API_URL_V1_READ_STEP_PAGE).route(get().to(read_step_page::<T>)))
                 .service(Files::new("/", "./static/").index_file("index.html"))
         });
 
